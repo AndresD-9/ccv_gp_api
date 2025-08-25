@@ -37,7 +37,7 @@ Route::post('/login', function (Request $request) {
 
     // Validar que el usuario esté activo
     if ($user->activo !== 1) {
-        return response()->json(['error' => 'Usuario inactivo'], 403);
+        return response()->json(['error' => 'Usuario no autorizado'], 403);
     }
 
     // Crear token
