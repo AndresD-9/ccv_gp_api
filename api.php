@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -90,6 +89,13 @@ Route::get('/usuario/{id}/grupo', function ($id) {
     }
 
     return response()->json(['rol' => $rol->name ?? 'sin rol']);
+});
+
+// Ruta de logout (cerrar sesión)
+Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
+    $request->user()->currentAccessToken()->delete();
+
+    return response()->json(['status' => 'ok', 'message' => 'Sesión cerrada correctamente']);
 });
 
 // Ruta protegida de ejemplo
