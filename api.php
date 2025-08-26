@@ -105,7 +105,6 @@ Route::post('/register', function (Request $request) {
         'name'     => 'required|string|max:255',
         'email'    => 'required|email|unique:users,email',
         'password' => 'required|min:6',
-        'phone'    => 'nullable|string',
     ]);
 
     // Crear usuario
@@ -114,7 +113,6 @@ Route::post('/register', function (Request $request) {
         'email'    => $request->email,
         'password' => Hash::make($request->password),
         'activo'   => 0,// Por defecto inactivo
-        'phone'    => $request->phone,
     ]);
 
     // Asignar rol si lo deseas (ejemplo: rol 'usuario')
@@ -134,7 +132,6 @@ Route::post('/register', function (Request $request) {
             'id'    => $user->id,
             'name'  => $user->name,
             'email' => $user->email,
-            'phone' => $user->phone,
         ]
     ]);
 });
