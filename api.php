@@ -96,6 +96,47 @@ Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
     $request->user()->currentAccessToken()->delete();
 
     return response()->json(['status' => 'ok', 'message' => 'Sesión cerrada correctamente']);
+    // para cerrar todas las sesiones, usar: $request->user()->tokens()->delete();
+});
+
+// Ruta de registro de usuario
+Route::post('/register', function (Request $request) {
+    $request->validate([
+        'name'     => 'required|string|max:255',
+        'email'    => 'required|email|unique:users,email',
+        'password' => 'required|min:6',
+        'phone'    => 'nullable|string',
+    ]);
+
+    // Crear usuario
+    $user = User::create([
+        'name'     => $request->name,
+        'email'    => $request->email,
+        'password' => Hash::make($request->password),
+        'activo'   => 0,// Por defecto inactivo
+        'phone'    => $request->phone,
+    ]);
+
+    // Asignar rol si lo deseas (ejemplo: rol 'usuario')
+    $rolUsuario = DB::table('roles')->where('name', 'usuario')->first();
+    if ($rolUsuario) {
+        DB::table('model_has_roles')->insert([
+            'role_id'    => $rolUsuario->id,
+            'model_type' => 'App\\Models\\User',
+            'model_id'   => $user->id,
+        ]);
+    }
+
+    return response()->json([
+        'status' => 'ok',
+        'message' => 'Usuario registrado correctamente',
+        'user' => [
+            'id'    => $user->id,
+            'name'  => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+        ]
+    ]);
 });
 
 // Ruta protegida de ejemplo
