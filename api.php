@@ -67,8 +67,8 @@ Route::get('/usuario/{id}/rol', function ($id) {
     return response()->json(['rol' => $rol->name ?? 'sin rol']);
 });
 
-// Ruta para obtener el grupo del usuario si es líder y sus grupos
-Route::get('/usuario/{id}/grupo', function ($id) {
+// Ruta para conocer el rol del usuario y sus grupos si es líder
+Route::get('/usuario/{id}/lider_grupo', function ($id) {
     $rol = DB::table('model_has_roles')
         ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
         ->where('model_has_roles.model_id', $id)
@@ -89,6 +89,18 @@ Route::get('/usuario/{id}/grupo', function ($id) {
     }
 
     return response()->json(['rol' => $rol->name ?? 'sin rol']);
+});
+
+// Ruta para los grupos donde el usuario está asignado
+Route::get('/usuario/{id}/grupo_asignado', function ($id) {
+    $grupos = DB::table('lider_grupo') // o 'user_group_map' según tu estructura
+        ->where('id_user', $id)
+        ->pluck('id_grupo');
+
+    return response()->json([
+        'usuario_id' => $id,
+        'grupos' => $grupos,
+    ]);
 });
 
 // Ruta de logout (cerrar sesión)
@@ -146,5 +158,32 @@ Route::middleware('auth:sanctum')->get('/productos', function () {
 Route::get('/users', function () {
     $users = DB::table('users')->get();
     return response()->json($users);
+});
+
+Route::get('/usuario/{id}/info_grupos', function ($id) {
+    $rol = DB::table('model_has_roles')
+        ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+        ->where('model_has_roles.model_id', $id)
+        ->where('model_has_roles.model_type', 'App\\Models\\User')
+        ->select('roles.name')
+        ->first();
+
+    $grupoLiderado = null;
+    if ($rol && $rol->name === 'lider') {
+        $grupoLiderado = DB::table('lider_grupo')
+            ->where('id_user', $id)
+            ->value('id_grupo');
+    }
+
+    $gruposAsignados = DB::table('lider_grupo')
+        ->where('id_user', $id)
+        ->pluck('id_grupo');
+
+    return response()->json([
+        'usuario_id' => $id,
+        'rol' => $rol->name ?? 'sin rol',
+        'grupo_liderado' => $grupoLiderado ?? 'no aplica',
+        'grupos_asignados' => $gruposAsignados,
+    ]);
 });
 */
