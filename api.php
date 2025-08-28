@@ -96,7 +96,7 @@ Route::get('/usuario/{id}/grupo_asignado', function ($id) {
     $grupos = DB::table('grupo_has_user as gu')
         ->join('blogs as b', 'b.id', '=', 'gu.id_grupo')
         ->where('gu.id_user', $id)
-        ->select('b.id', 'b.titulo', 'b.lugar', 'b.horario')
+        ->select('b.id', 'b.titulo', 'b.lugar', 'b.horario', 'b.contenido', 'b.imagen_nombre', 'b.lider')
         ->get();
 
     return response()->json([
