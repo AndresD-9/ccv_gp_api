@@ -93,9 +93,11 @@ Route::get('/usuario/{id}/lider_grupo', function ($id) {
 
 // Ruta para los grupos donde el usuario está asignado
 Route::get('/usuario/{id}/grupo_asignado', function ($id) {
-    $grupos = DB::table('grupo_has_user')
-        ->where('user_id', $id)
-        ->pluck('grupo_id');
+    $grupos = DB::table('grupo_has_user as gu')
+        ->join('blogs as b', 'b.id', '=', 'gu.id_grupo')
+        ->where('gu.id_user', $id)
+        ->select('b.id', 'b.titulo', 'b.lugar', 'b.horario')
+        ->get();
 
     return response()->json([
         'usuario_id' => $id,
