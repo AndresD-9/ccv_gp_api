@@ -67,30 +67,6 @@ Route::get('/usuario/{id}/rol', function ($id) {
     return response()->json(['rol' => $rol->name ?? 'sin rol']);
 });
 
-// Ruta para conocer el rol del usuario y sus grupos si es líder
-Route::get('/usuario/{id}/lider_grupo', function ($id) {
-    $rol = DB::table('model_has_roles')
-        ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-        ->where('model_has_roles.model_id', $id)
-        ->where('model_has_roles.model_type', 'App\\Models\\User')
-        ->select('roles.name')
-        ->first();
-
-    if ($rol && $rol->name === 'lider') {
-        $grupo = DB::table('lider_grupo')
-            ->where('id_user', $id)
-            ->select('id_grupo')
-            ->first();
-
-        return response()->json([
-            'rol' => 'lider',
-            'grupo' => $grupo->id_grupo ?? 'sin grupo asignado'
-        ]);
-    }
-
-    return response()->json(['rol' => $rol->name ?? 'sin rol']);
-});
-
 // Ruta para los grupos donde el usuario está asignado
 Route::get('/usuario/{id}/grupo_asignado', function ($id) {
     $grupos = DB::table('grupo_has_user as gu')
@@ -187,5 +163,29 @@ Route::get('/usuario/{id}/info_grupos', function ($id) {
         'grupo_liderado' => $grupoLiderado ?? 'no aplica',
         'grupos_asignados' => $gruposAsignados,
     ]);
+});
+
+// Ruta para conocer el rol del usuario y sus grupos si es líder
+Route::get('/usuario/{id}/lider_grupo', function ($id) {
+    $rol = DB::table('model_has_roles')
+        ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
+        ->where('model_has_roles.model_id', $id)
+        ->where('model_has_roles.model_type', 'App\\Models\\User')
+        ->select('roles.name')
+        ->first();
+
+    if ($rol && $rol->name === 'lider') {
+        $grupo = DB::table('lider_grupo')
+            ->where('id_user', $id)
+            ->select('id_grupo')
+            ->first();
+
+        return response()->json([
+            'rol' => 'lider',
+            'grupo' => $grupo->id_grupo ?? 'sin grupo asignado'
+        ]);
+    }
+
+    return response()->json(['rol' => $rol->name ?? 'sin rol']);
 });
 */
