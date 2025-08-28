@@ -93,9 +93,9 @@ Route::get('/usuario/{id}/lider_grupo', function ($id) {
 
 // Ruta para los grupos donde el usuario está asignado
 Route::get('/usuario/{id}/grupo_asignado', function ($id) {
-    $grupos = DB::table('grupo_has_user') // o 'user_group_map' según tu estructura
-        ->where('id_user', $id)
-        ->pluck('id_grupo');
+    $grupos = DB::table('grupo_has_user')
+        ->where('user_id', $id)
+        ->pluck('grupo_id');
 
     return response()->json([
         'usuario_id' => $id,
