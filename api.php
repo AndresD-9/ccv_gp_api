@@ -131,6 +131,18 @@ Route::middleware('auth:sanctum')->get('/productos', function () {
     return App\Models\Producto::all();
 });
 
+// Ruta para obtener todos los grupos
+Route::get('/grupos', function () {
+    $grupos = DB::table('blogs')
+        ->select('id', 'titulo', 'lugar', 'horario', 'contenido', 'imagen_nombre', 'lider')
+        ->get();
+
+    return response()->json([
+        'total' => $grupos->count(),
+        'grupos' => $grupos,
+    ]);
+});
+
 
 /* PRIMER TEST DE FUNCIONALIDAD
 Route::get('/users', function () {
