@@ -143,7 +143,15 @@ Route::get('/grupos', function () {
     ]);
 });
 
+Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
+    // Elimina SOLO el token usado en esta sesión
+    $request->user()->currentAccessToken()->delete();
 
+    // O si quieres eliminar TODOS los tokens del usuario:
+    // $request->user()->tokens()->delete();
+
+    return response()->json(['message' => 'Sesión cerrada correctamente']);
+});
 /* PRIMER TEST DE FUNCIONALIDAD
 Route::get('/users', function () {
     $users = DB::table('users')->get();
