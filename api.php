@@ -21,7 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // Ruta de login (autenticación)
-Route::post('/login', function (Request $request) {
+Route::middleware('auth:sanctum')->post('/login', function (Request $request) {
     $request->validate([
         'email' => 'required|email',
         'password' => 'required'
@@ -56,7 +56,7 @@ Route::post('/login', function (Request $request) {
     ]);
 });
 // Ruta para obtener el rol del usuario
-Route::get('/usuario/{id}/rol', function ($id) {
+Route::middleware('auth:sanctum')->get('/usuario/{id}/rol', function ($id) {
     $rol = DB::table('model_has_roles')
         ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
         ->where('model_has_roles.model_id', $id)
@@ -68,7 +68,7 @@ Route::get('/usuario/{id}/rol', function ($id) {
 });
 
 // Ruta para los grupos donde el usuario está asignado
-Route::get('/usuario/{id}/grupo_asignado', function ($id) {
+Route::middleware('auth:sanctum')->get('/usuario/{id}/grupo_asignado', function ($id) {
     $grupos = DB::table('grupo_has_user as gu')
         ->join('blogs as b', 'b.id', '=', 'gu.id_grupo')
         ->where('gu.id_user', $id)
@@ -90,7 +90,7 @@ Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
 });
 
 // Ruta de registro de usuario
-Route::post('/register', function (Request $request) {
+Route::middleware('auth:sanctum')->post('/register', function (Request $request) {
     $request->validate([
         'name'     => 'required|string|max:255',
         'email'    => 'required|email|unique:users,email',
@@ -126,13 +126,8 @@ Route::post('/register', function (Request $request) {
     ]);
 });
 
-// Ruta protegida de ejemplo
-Route::middleware('auth:sanctum')->get('/productos', function () {
-    return App\Models\Producto::all();
-});
-
 // Ruta para obtener todos los grupos
-Route::get('/grupos', function () {
+Route::middleware('auth:sanctum')->get('/grupos', function () {
     $grupos = DB::table('blogs')
         ->select('id', 'titulo', 'lugar', 'horario', 'contenido', 'imagen_nombre', 'lider')
         ->get();
