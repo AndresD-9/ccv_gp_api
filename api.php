@@ -138,6 +138,7 @@ Route::middleware('auth:sanctum')->get('/grupos', function () {
     ]);
 });
 
+// Ruta para eliminar token
 Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
     // Elimina SOLO el token usado en esta sesión
     //$request->user()->currentAccessToken()->delete();
@@ -146,6 +147,36 @@ Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
     $request->user()->tokens()->delete();
 
     return response()->json(['message' => 'Sesión cerrada correctamente']);
+});
+// Ruta para solicitar unirse a un grupo
+class Solicitud extends Model
+{
+    use HasFactory;
+
+    protected $table = 'solicitud';
+
+    protected $fillable = [
+        'id_user',
+        'id_grupo',
+        'estado',
+    ];
+}
+
+Route::middleware('auth:sanctum')->post('/solicitar-grupo', function (Request $request) {
+    $validated = $request->validate([
+        'id_grupo' => 'required|integer|exists:grupos,id', // o la tabla que use tus grupos
+    ]);
+
+    $solicitud = Solicitud::create([
+        'id_user' => $request->user()->id,
+        'id_grupo' => $validated['id_grupo'],
+        'estado' => 'pendiente',
+    ]);
+
+    return response()->json([
+        'message' => 'Solicitud enviada correctamente',
+        'solicitud' => $solicitud,
+    ], 201);
 });
 /* PRIMER TEST DE FUNCIONALIDAD
 Route::get('/users', function () {
