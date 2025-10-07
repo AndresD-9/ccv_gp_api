@@ -149,19 +149,6 @@ Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
     return response()->json(['message' => 'Sesión cerrada correctamente']);
 });
 // Ruta para solicitar unirse a un grupo
-class Solicitud extends Model
-{
-    use HasFactory;
-
-    protected $table = 'solicitud';
-
-    protected $fillable = [
-        'id_user',
-        'id_grupo',
-        'estado',
-    ];
-}
-
 Route::middleware('auth:sanctum')->post('/solicitar-grupo', function (Request $request) {
     $validated = $request->validate([
         'id_grupo' => 'required|integer|exists:grupos,id', // o la tabla que use tus grupos
