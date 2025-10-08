@@ -158,8 +158,10 @@ Route::middleware('auth:sanctum')->post('/solicitar-grupo', function (Request $r
         'id_grupo' => 'required|integer|exists:blogs,id',
     ]);
 
-    $yaSolicito = DB::table('solicitud')
-        ->where('id_user', $request->user()->id)
+    $user = $request->user();
+
+    // Verificar si ya existe una solicitud
+    $yaSolicito = Solicitud::where('id_user', $user->id)
         ->where('id_grupo', $validated['id_grupo'])
         ->exists();
 
@@ -167,46 +169,23 @@ Route::middleware('auth:sanctum')->post('/solicitar-grupo', function (Request $r
         return response()->json(['error' => 'Ya enviaste una solicitud para este grupo'], 409);
     }
 
+    // Obtener datos del grupo
+    $grupo = Blog::find($validated['id_grupo']);
+
+    // Crear solicitud
     $solicitud = Solicitud::create([
-        'id_user' => $request->user()->id,
-        'id_grupo' => $validated['id_grupo'],
-        'estado' => 'pendiente',
+        'id_user'     => $user->id,
+        'id_grupo'    => $grupo->id,
+        'name_user'   => $user->name,
+        'name_grupo'  => $grupo->titulo,
+        'email'       => $user->email,
+        'estado'      => 'pendiente',
     ]);
 
     return response()->json([
         'message' => 'Solicitud enviada correctamente',
         'solicitud' => $solicitud,
     ], 201);
-});
-
-// 🟢 AUTORIZAR O RECHAZAR SOLICITUD (solo líder del grupo)
-Route::middleware('auth:sanctum')->post('/autorizar-solicitud', function (Request $request) {
-    $validated = $request->validate([
-        'id_solicitud' => 'required|integer|exists:solicitud,id',
-        'accion' => 'required|in:aceptar,rechazar',
-    ]);
-
-    $solicitud = Solicitud::find($validated['id_solicitud']);
-    $grupo = Blog::find($solicitud->id_grupo);
-
-    if ($request->user()->id !== $grupo->lider) {
-        return response()->json(['error' => 'No tienes permiso para autorizar esta solicitud'], 403);
-    }
-
-    if ($validated['accion'] === 'aceptar') {
-        DB::table('grupo_has_user')->insert([
-            'id_grupo' => $solicitud->id_grupo,
-            'id_user' => $solicitud->id_user,
-        ]);
-        $solicitud->update(['estado' => 'aceptada']);
-    } else {
-        $solicitud->update(['estado' => 'rechazada']);
-    }
-
-    return response()->json([
-        'message' => 'Solicitud ' . $validated['accion'] . ' correctamente',
-        'solicitud' => $solicitud,
-    ]);
 });
 
 
