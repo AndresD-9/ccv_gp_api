@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Models\Solicitud;
+use App\Models\Blog;
+use App\Models\Grupos;
 /*
 |--------------------------------------------------------------------------
 | API Routes
