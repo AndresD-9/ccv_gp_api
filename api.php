@@ -148,11 +148,21 @@ Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
 
     return response()->json(['message' => 'Sesión cerrada correctamente']);
 });
+
 // Ruta para solicitar unirse a un grupo
 Route::middleware('auth:sanctum')->post('/solicitar-grupo', function (Request $request) {
     $validated = $request->validate([
-        'id_grupo' => 'required|integer|exists:grupos,id', // o la tabla que use tus grupos
+        'id_grupo' => 'required|integer|exists:blogs,id',
     ]);
+
+    $yaSolicito = DB::table('solicitud')
+        ->where('id_user', $request->user()->id)
+        ->where('id_grupo', $validated['id_grupo'])
+        ->exists();
+
+    if ($yaSolicito) {
+        return response()->json(['error' => 'Ya enviaste una solicitud para este grupo'], 409);
+    }
 
     $solicitud = Solicitud::create([
         'id_user' => $request->user()->id,
@@ -165,6 +175,38 @@ Route::middleware('auth:sanctum')->post('/solicitar-grupo', function (Request $r
         'solicitud' => $solicitud,
     ], 201);
 });
+
+// 🟢 AUTORIZAR O RECHAZAR SOLICITUD (solo líder del grupo)
+Route::middleware('auth:sanctum')->post('/autorizar-solicitud', function (Request $request) {
+    $validated = $request->validate([
+        'id_solicitud' => 'required|integer|exists:solicitud,id',
+        'accion' => 'required|in:aceptar,rechazar',
+    ]);
+
+    $solicitud = Solicitud::find($validated['id_solicitud']);
+    $grupo = Blog::find($solicitud->id_grupo);
+
+    if ($request->user()->id !== $grupo->lider) {
+        return response()->json(['error' => 'No tienes permiso para autorizar esta solicitud'], 403);
+    }
+
+    if ($validated['accion'] === 'aceptar') {
+        DB::table('grupo_has_user')->insert([
+            'id_grupo' => $solicitud->id_grupo,
+            'id_user' => $solicitud->id_user,
+        ]);
+        $solicitud->update(['estado' => 'aceptada']);
+    } else {
+        $solicitud->update(['estado' => 'rechazada']);
+    }
+
+    return response()->json([
+        'message' => 'Solicitud ' . $validated['accion'] . ' correctamente',
+        'solicitud' => $solicitud,
+    ]);
+});
+
+
 /* PRIMER TEST DE FUNCIONALIDAD
 Route::get('/users', function () {
     $users = DB::table('users')->get();
