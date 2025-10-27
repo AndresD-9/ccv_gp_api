@@ -41,9 +41,9 @@ Route::post('/login', function (Request $request) {
     }
 
     // Validar que el usuario esté activo
-    // if ($user->activo !== 1) { // Descomenta si usas 'activo'
-    //     return response()->json(['error' => 'Usuario no autorizado'], 403);
-    // }
+    if ($user->activo !== 1) { // Descomenta si usas 'activo'
+        return response()->json(['error' => 'Usuario no autorizado'], 403);
+    }
 
     // Crear token
     $token = $user->createToken('app_token')->plainTextToken;
