@@ -40,10 +40,7 @@ Route::post('/login', function (Request $request) {
         return response()->json(['error' => 'Credenciales inválidas'], 401);
     }
 
-    // Validar que el usuario esté activo
-    if ($user->activo !== 1) { // Descomenta si usas 'activo'
-        return response()->json(['error' => 'Usuario no autorizado'], 403);
-    }
+
 
     // Crear token
     $token = $user->createToken('app_token')->plainTextToken;
