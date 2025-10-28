@@ -68,6 +68,35 @@ Route::post('password/verify-token', [PasswordResetController::class, 'verifyTok
 // 3. Actualizar la contraseña
 Route::post('password/reset', [PasswordResetController::class, 'resetPassword']);
 
+// Ruta de registro de usuario
+Route::post('/register', function (Request $request) {
+    $request->validate([
+        'name'     => 'required|string|max:255',
+        'email'    => 'required|email|unique:users,email',
+        'password' => 'required|min:6',
+    ]);
+    $user = User::create([
+        'name'     => $request->name,
+        'email'    => $request->email,
+        'password' => Hash::make($request->password),
+        // 'activo'   => 0, // Si usas 'activo'
+    ]);
+    // Asignar rol 'usuario' (Asegúrate que exista el rol 'usuario')
+    // $user->assignRole('usuario'); // Usando Spatie si está configurado
+     $rolUsuario = DB::table('roles')->where('name', 'usuario')->first();
+     if ($rolUsuario) {
+         DB::table('model_has_roles')->insert([
+             'role_id'    => $rolUsuario->id,
+             'model_type' => 'App\\Models\\User',
+             'model_id'   => $user->id,
+         ]);
+     }
+    return response()->json([
+        'status' => 'ok',
+        'message' => 'Usuario registrado correctamente',
+        'user' => $user->only(['id', 'name', 'email']) // Devuelve solo datos seguros
+    ], 201); // Código 201 para recurso creado
+});
 
 // --- RUTAS PROTEGIDAS (Requieren token vía 'auth:sanctum') ---
 Route::middleware('auth:sanctum')->group(function () {
@@ -112,37 +141,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', function (Request $request) {
         $request->user()->currentAccessToken()->delete(); // Borra solo el token actual
         return response()->json(['status' => 'ok', 'message' => 'Sesión cerrada correctamente']);
-    });
-
-    // Ruta de registro de usuario
-    // CONSIDERAR: ¿Debería ser pública o solo para admins? Si es pública, mover fuera del grupo.
-    Route::post('/register', function (Request $request) {
-        $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|min:6',
-        ]);
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            // 'activo'   => 0, // Si usas 'activo'
-        ]);
-        // Asignar rol 'usuario' (Asegúrate que exista el rol 'usuario')
-        // $user->assignRole('usuario'); // Usando Spatie si está configurado
-         $rolUsuario = DB::table('roles')->where('name', 'usuario')->first();
-         if ($rolUsuario) {
-             DB::table('model_has_roles')->insert([
-                 'role_id'    => $rolUsuario->id,
-                 'model_type' => 'App\\Models\\User',
-                 'model_id'   => $user->id,
-             ]);
-         }
-        return response()->json([
-            'status' => 'ok',
-            'message' => 'Usuario registrado correctamente',
-            'user' => $user->only(['id', 'name', 'email']) // Devuelve solo datos seguros
-        ], 201); // Código 201 para recurso creado
     });
 
     // Ruta para obtener todos los grupos
