@@ -10,7 +10,7 @@ use App\Models\Blog;
 use App\Models\Grupos;
 use App\Http\Controllers\DeviceTokenController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\Auth\PasswordResetController; // Para recuperación
+use App\Http\Controllers\PasswordResetController; // Para recuperación
 
 /*
 |--------------------------------------------------------------------------
@@ -40,7 +40,10 @@ Route::post('/login', function (Request $request) {
         return response()->json(['error' => 'Credenciales inválidas'], 401);
     }
 
-
+    // Validar que el usuario esté activo
+    if ($user->activo !== 1) { // Descomenta si usas 'activo'
+        return response()->json(['error' => 'Usuario no autorizado'], 403);
+    }
 
     // Crear token
     $token = $user->createToken('app_token')->plainTextToken;
@@ -58,7 +61,11 @@ Route::post('/login', function (Request $request) {
 });
 
 // Rutas para recuperación de contraseña (Públicas)
-Route::post('password/email', [PasswordResetController::class, 'sendResetLinkEmail']);
+// 1. Solicitar el token (código de 6 dígitos)
+Route::post('password/email', [PasswordResetController::class, 'sendResetToken']);
+// 2. Verificar que el token sea válido
+Route::post('password/verify-token', [PasswordResetController::class, 'verifyToken']);
+// 3. Actualizar la contraseña
 Route::post('password/reset', [PasswordResetController::class, 'resetPassword']);
 
 
@@ -89,7 +96,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Importante: Verifica permisos
          if (auth()->id() != $id /* && !auth()->user()->hasRole('admin') */) { // Ejemplo
              return response()->json(['error' => 'No autorizado'], 403);
-        }
+         }
         $grupos = DB::table('grupo_has_user as gu')
             ->join('blogs as b', 'b.id', '=', 'gu.id_grupo') // Asumiendo que 'blogs' es la tabla de grupos
             ->where('gu.id_user', $id)
@@ -166,12 +173,12 @@ Route::middleware('auth:sanctum')->group(function () {
              return response()->json(['error' => 'Grupo no encontrado'], 404);
         }
         $solicitud = Solicitud::create([
-            'id_user'     => $user->id,
-            'id_grupo'    => $grupo->id,
-            'name_user'   => $user->name,
-            'name_grupo'  => $grupo->titulo,
-            'email'       => $user->email,
-            'estado'      => 'pendiente',
+            'id_user'    => $user->id,
+            'id_grupo'   => $grupo->id,
+            'name_user'  => $user->name,
+            'name_grupo' => $grupo->titulo,
+            'email'      => $user->email,
+            'estado'     => 'pendiente',
         ]);
         return response()->json([
             'message' => 'Solicitud enviada correctamente',
@@ -257,3 +264,4 @@ Route::get('/usuario/{id}/lider_grupo', function ($id) {
     return response()->json(['rol' => $rol->name ?? 'sin rol']);
 });
 */
+
