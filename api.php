@@ -212,10 +212,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cambiar-contrasena', function (Request $request) {
         $validated = $request->validate([
             'contrasena_actual' => 'required|string',
-            'contrasena_nueva' => 'required|string|min:8|confirmed',
+            'contrasena_nueva' => 'required|string|min:8',
         ]);
         
-        $user = $request->user(); // Usuario autenticado
+        $user = $request->user();
         
         // Verifica que la contraseña actual sea correcta
         if (!Hash::check($validated['contrasena_actual'], $user->password)) {
