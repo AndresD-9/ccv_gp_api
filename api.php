@@ -184,12 +184,55 @@ Route::middleware('auth:sanctum')->group(function () {
         ], 201);
     });
 
-    // --- ¡AQUÍ ESTÁN LAS RUTAS DE NOTIFICACIONES, AHORA PROTEGIDAS! ---
+    // --- Debido al hosting no es posible conectarse con las notificaciones ---
     // Guardar el token FCM de un dispositivo
     Route::post('/save-fcm-token', [DeviceTokenController::class, 'saveToken']);
 
     // Enviar una notificación (ej. un mensaje)
     Route::post('/send-notification', [NotificationController::class, 'sendNotification']);
+
+    // Ruta para actualizar el perfil del usuario
+    Route::put('/perfil', function (Request $request) {
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:255',
+        ]);
+        
+        $user = $request->user(); // Usuario autenticado
+        $user->update([
+            'name' => $validated['nombre'],
+        ]);
+        
+        return response()->json([
+            'message' => 'Perfil actualizado correctamente',
+            'user' => $user,
+        ], 200);
+    });
+
+    // Ruta para cambiar la contraseña del usuario
+    Route::post('/cambiar-contrasena', function (Request $request) {
+        $validated = $request->validate([
+            'contrasena_actual' => 'required|string',
+            'contrasena_nueva' => 'required|string|min:8|confirmed',
+        ]);
+        
+        $user = $request->user(); // Usuario autenticado
+        
+        // Verifica que la contraseña actual sea correcta
+        if (!Hash::check($validated['contrasena_actual'], $user->password)) {
+            return response()->json([
+                'error' => 'La contraseña actual es incorrecta',
+            ], 401);
+        }
+        
+        // Actualiza la contraseña
+        $user->update([
+            'password' => Hash::make($validated['contrasena_nueva']),
+        ]);
+        
+        return response()->json([
+            'message' => 'Contraseña actualizada correctamente',
+        ], 200);
+    });
 
 }); // <-- FIN DEL GRUPO PROTEGIDO
 
