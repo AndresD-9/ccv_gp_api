@@ -239,6 +239,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Enviar notificación a un grupo específico
     Route::post('/send-group-notification', [NotificationController::class, 'sendGroupNotification']);
 
+    // Ruta para verificar si el usuario es líder de un grupo
+    Route::get('/es-lider', [UsuarioController::class, 'esLider']);
+
 }); // <-- FIN DEL GRUPO PROTEGIDO
 
 
