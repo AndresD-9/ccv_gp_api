@@ -244,15 +244,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Ruta para obtener los grupos liderados por un usuario
     Route::get('/usuario/{id}/grupos_liderados', function ($id) {
-        $grupos = DB::table('lider_grupo')
-            ->where('id_lider', $id)
-            ->pluck('id_grupo');
+    $grupos = DB::table('lider_grupo')
+        ->where('id_lider', $id)
+        ->pluck('id_grupo');
 
-        return response()->json([
-            'grupos_liderados' => $grupos,
-        ]);
-    });
+    return response()->json([
+        'grupos_liderados' => $grupos,
+    ]);
 });
+
 
 
 }); // <-- FIN DEL GRUPO PROTEGIDO
