@@ -89,7 +89,7 @@ Route::post('/register', function (Request $request) {
              'model_type' => 'App\\Models\\User',
              'model_id'   => $user->id,
          ]);
-     }
+     }$request->user()->tokens()->delete();
     return response()->json([
         'status' => 'ok',
         'message' => 'Usuario registrado correctamente',
@@ -138,7 +138,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Ruta de logout (cerrar sesión)
     Route::post('/logout', function (Request $request) {
-        $request->user()->currentAccessToken()->delete(); // Borra solo el token actual
+        $request->user()->tokens()->delete(); // Borra solo el token actual
         return response()->json(['status' => 'ok', 'message' => 'Sesión cerrada correctamente']);
     });
 
