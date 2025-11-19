@@ -10,8 +10,7 @@ use App\Models\Blog;
 use App\Models\Grupos;
 use App\Http\Controllers\DeviceTokenController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\PasswordResetController; // Para recuperación
-
+use App\Http\Controllers\PasswordResetController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -235,7 +234,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Ruta para eliminar el token FCM del dispositivo al hacer logout
-    Route::delete('/delete-fcm-token', [App\Http\Controllers\FcmTokenController::class, 'deleteToken']);
+    Route::delete('/delete-fcm-token', [DeviceTokenController::class, 'deleteToken']);
 
 }); // <-- FIN DEL GRUPO PROTEGIDO
 
