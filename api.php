@@ -234,6 +234,9 @@ Route::middleware('auth:sanctum')->group(function () {
         ], 200);
     });
 
+    // Ruta para eliminar el token FCM del dispositivo al hacer logout
+    Route::delete('/delete-fcm-token', [App\Http\Controllers\FcmTokenController::class, 'deleteToken']);
+
 }); // <-- FIN DEL GRUPO PROTEGIDO
 
 
