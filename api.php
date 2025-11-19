@@ -242,6 +242,18 @@ Route::middleware('auth:sanctum')->group(function () {
     // Ruta para verificar si el usuario es líder de un grupo
     Route::get('/es-lider', [UsuarioController::class, 'esLider']);
 
+    // Ruta para obtener los grupos liderados por un usuario
+    Route::get('/usuario/{id}/grupos_liderados', function ($id) {
+    $grupos = DB::table('lider_grupo')
+        ->where('id_user', $id)
+        ->pluck('id_grupo');
+
+    return response()->json([
+        'grupos_liderados' => $grupos,
+    ]);
+});
+
+
 }); // <-- FIN DEL GRUPO PROTEGIDO
 
 
@@ -289,28 +301,6 @@ Route::get('/usuario/{id}/info_grupos', function ($id) {
     ]);
 });
 
-// Ruta para conocer el rol del usuario y sus grupos si es líder
-Route::get('/usuario/{id}/lider_grupo', function ($id) {
-    $rol = DB::table('model_has_roles')
-        ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-        ->where('model_has_roles.model_id', $id)
-        ->where('model_has_roles.model_type', 'App\\Models\\User')
-        ->select('roles.name')
-        ->first();
 
-    if ($rol && $rol->name === 'lider') {
-        $grupo = DB::table('lider_grupo')
-            ->where('id_user', $id)
-            ->select('id_grupo')
-            ->first();
-
-        return response()->json([
-            'rol' => 'lider',
-            'grupo' => $grupo->id_grupo ?? 'sin grupo asignado'
-        ]);
-    }
-
-    return response()->json(['rol' => $rol->name ?? 'sin rol']);
-});
 */
 
